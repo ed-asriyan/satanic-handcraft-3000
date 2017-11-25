@@ -1,4 +1,3 @@
-#! /usr/bin/env python
 # coding: utf-8
 from collections import deque
 from threading import Thread
@@ -250,9 +249,9 @@ def receive_data_from_eeg():
                                 learnData += valuechannel1[i][j]
                                 learnData += valuechannel2[i][j]
                                 learnData += valuechannel3[i][j]
-                        print "__________________"
-                        print learnData
-                        print "__________________"
+                        print("__________________")
+                        print(learnData)
+                        print("__________________")
                         counter = 0
                         time.sleep(0.5)
                         begin_time = time.time()
@@ -266,15 +265,15 @@ def lets_start():
     ser_init()  # инициализация порта
 
     # Основной цикл
-    print "Начинаю считывание через 5 секунд, запустите видеоролик"
+    print("Начинаю считывание через 5 секунд, запустите видеоролик")
     time.sleep(5)
     duration = 60 * 3.4  # длительность видео
     start = time.time()
-    print "Считывание начато, осталось: \n"
+    print("Считывание начато, осталось: \n")
     while time.time() - start < duration:
         receive_data_from_eeg()
         time.sleep(2)
-        print ">>>", duration - (time.time() - start)
+        print(">>>", duration - (time.time() - start))
 
     f = open("RAW.txt", "w")
     for i in range(len(allRawData)):
