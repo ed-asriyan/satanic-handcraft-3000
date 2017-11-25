@@ -20,8 +20,8 @@ from threading import Thread
 # глобальные переменные
 root = Tk.Tk()
 datafile = "eeg.dat"
-buf = [] 
-ref = 0; 
+buf = []
+ref = 0;
 FSM_state = 0 #[0 - "education", 1 - "work"]
 CMD = 0 #[0 - "left", 1 - "right"]
 run_state = False # run/stop state
@@ -94,7 +94,7 @@ def calc(data):
 def send_cmd(cmd):
 	ser.write(cmd.encode())
 	time.sleep(0.5)
-	
+
 #инициализация
 def ser_init():
 	#Open serial
@@ -155,7 +155,7 @@ def ser_init():
 	time.sleep(3)
 	#Clear all buffers
 	ser.flushInput()
-	ser.flushOutput()    
+	ser.flushOutput()
 
 #Чтение файла в буфер
 def file_init():
@@ -173,7 +173,7 @@ def buf_read(count):
 	global ref
 	res = ""
 	for i in range(count):
-		res+=buf[ref];		
+		res+=buf[ref];
 		ref = (ref+1)%len(buf)
 		time.sleep(0.000001)
 	return res
@@ -188,7 +188,7 @@ def get(count):
 
 def receive_data_from_eeg():
 
-	
+
 	# массив FiFo
  	global valuechannel1
   	global valuechannel2
@@ -200,7 +200,7 @@ def receive_data_from_eeg():
 	valuechannel2.clear()
 	valuechannel3.clear()
 
-	#wait 100 ms	
+	#wait 100 ms
 	time.sleep(0.1)
 
 	#Clear all buffers
@@ -213,7 +213,7 @@ def receive_data_from_eeg():
 	learnData=[]
   	counter = 0
 	break_flag = False
-  	while not(break_flag) : # Цикл 
+  	while not(break_flag) : # Цикл
 	  	data_of_byte = get(3)
 	  	header = change3byte(data_of_byte)
 	  	headerfirstbyte = int(header[0])
@@ -228,7 +228,7 @@ def receive_data_from_eeg():
 	    		headersecondbyte = headerthirtbyte
 	    		headerthirtbyte = int(header_nextbyte[0])
 	   	if headerfirstbyte == 1 and headersecondbyte == 28 and headerthirtbyte == 32:
-	    		data_of_byte = data_of_byte + get(520) 
+	    		data_of_byte = data_of_byte + get(520)
 	    		size = change2byte(data_of_byte[7:9]) #Информация об объеме данных
 	    		if int(size[0]) == 512: #Проверка размеров данных
 	     			x = 9
@@ -247,14 +247,14 @@ def receive_data_from_eeg():
 	     			crc = change2byteCRC(crc)
 	    			if int(crc[0]) == crc_check: #Сравнения CRC
 	       				end_time = time.time()
-	       				my_time = end_time - begin_time 
+	       				my_time = end_time - begin_time
 	       				if counter < 4 : #Пока не получим 4 пакета (но не менее 500 мс от начала предъявления)
 						valuechannel1.append(matrix_of_value[0:15][0])
 						valuechannel2.append(matrix_of_value[1:15][0])
 						valuechannel3.append(matrix_of_value[2:15][0])
 						counter += 1
 	       				else: #Иначе отправка данных в Bluemix + очистка FiFo
-						# 
+						#
 						for i in range(4):
 							for j in range (16):
 								learnData+=valuechannel1[i][j]
@@ -286,27 +286,27 @@ def constructPerceptron (name, numNeurons):
     newLayer = None
     for i, val in enumerate(numNeurons):
         # Если слой входной, он линейный
-        if (i == 0): 
+        if (i == 0):
             newLayer = LinearLayer(val, 'input')
             net.addInputModule(newLayer)
             prevLayer = newLayer
-        # Если слой выходной, он линейный    
+        # Если слой выходной, он линейный
         elif (i == len(numNeurons) - 1):
             newLayer = LinearLayer(val, 'output')
             net.addOutputModule(newLayer)
-        # Иначе - слой сигмоидный   
+        # Иначе - слой сигмоидный
         else:
             newLayer = SigmoidLayer(val, 'hidden_' + str(i))
-            net.addModule(newLayer)    
+            net.addModule(newLayer)
         # Если слой не входной, создаём связь между новым и предыдущим слоями
         if (i > 0):
             conn = FullConnection(prevLayer, newLayer, 'conn_' + str(i))
             net.addConnection(conn)
             prevLayer = newLayer
-    # Готовим сеть к активации, упорядочивая её внутреннюю структуру        
+    # Готовим сеть к активации, упорядочивая её внутреннюю структуру
     net.sortModules()
     # Готово
-    return net	
+    return net
 
 
 def constructDataset (name, learnData):
@@ -335,19 +335,19 @@ def trainNetwork (net, trainData):
     """
       # Трейнер для обучения с учителем
     trainer = BackpropTrainer(net, trainData)
-      # Запускаем трейнер на 1 эпоху и запоминаем оценку ошибки 
+      # Запускаем трейнер на 1 эпоху и запоминаем оценку ошибки
     coef = trainer.train()
     return (net, coef)
 
 # Обработка после кноки start
-def lets_start(): 
+def lets_start():
 	global FSM_state
 	global CMD
 	global root
-	global education	
- 
+	global education
+
 	#Ждем старта
-	while not run_state: 
+	while not run_state:
 		time.sleep(0.1)
 
 	# Работа с последовательном портом и файлом
@@ -384,7 +384,7 @@ def lets_start():
 			root.update()
 			time.sleep(3)
 
-			for i in range(10): 
+			for i in range(10):
 
 				#show image
 				background_image=Tk.PhotoImage(file="left.png")
@@ -398,7 +398,7 @@ def lets_start():
 				#
 				#
 				education.append((learnData,[1,0]))
-				
+
 
 				#show image
 				background_image=Tk.PhotoImage(file="wait.png")
@@ -451,7 +451,7 @@ def lets_start():
 			root.update()
 			time.sleep(3)
 
-			for i in range(10): 
+			for i in range(10):
 
 				#show image
 				background_image=Tk.PhotoImage(file="right.png")
@@ -503,7 +503,7 @@ def lets_start():
 
 
 			# Формирование обучающей выборки
-			#print education			
+			#print education
 			# Данные для обучения data поступают от ЭЭГ в описанном выше формате - списке обучающих пар
 			ds = constructDataset('data', education)
 			# Запуск 1 полной эпохи обучения
@@ -515,10 +515,10 @@ def lets_start():
 			root.wm_geometry("1000x650+20+40")
 			root.title('Go read your brain')
 			root.update()
-			FSM_state = 1 #Work, cmd = left	
+			FSM_state = 1 #Work, cmd = left
 			time.sleep(3)
 
-	
+
 		else:			#Work
 			if CMD == 1:
 				background_image=Tk.PhotoImage(file="left.png")
@@ -546,7 +546,7 @@ def lets_start():
 			root.wm_geometry("1000x650+20+40")
 			root.title('Go read your brain')
 			root.update()
-			FSM_state = 1 #Work, cmd = left	
+			FSM_state = 1 #Work, cmd = left
 			time.sleep(3)
 			if CMD == 1:
 				CMD = 0
@@ -562,7 +562,7 @@ def lets_start():
 	ser.close()
 
 #Изменение состояния
-def go():	
+def go():
 	global run_state
 	run_state = True
 
@@ -572,7 +572,7 @@ def go():
 m = Thread(target=lets_start)
 m.start()
 
-#Интерфейс 
+#Интерфейс
 background_image=Tk.PhotoImage(file="start.png")
 background_label = Tk.Label(root, image=background_image)
 background_label.place(x=0, y=0, relwidth=1, relheight=1)
