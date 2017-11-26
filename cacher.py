@@ -14,16 +14,10 @@ valuechannel1 = deque([])
 valuechannel2 = deque([])
 valuechannel3 = deque([])
 learnData = []
-education = []
 
 allRawData = []
 
-# режим работы
-state = 1  # Данные поступают из электроэнцефалографа
-# state = 0 	#Данные поступают из файла datafile
-
-if state == 1:
-    ser = serial.Serial("/dev/ttyUSB0")
+ser = serial.Serial("/dev/ttyUSB0")
 
 # преобразование данных
 
@@ -189,9 +183,8 @@ def receive_data_from_eeg():
     time.sleep(0.1)
 
     # Clear all buffers
-    if state:
-        ser.flushInput()
-        ser.flushOutput()
+    ser.flushInput()
+    ser.flushOutput()
 
     begin_time = time.time()
     buffer_lst = []
