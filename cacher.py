@@ -7,8 +7,6 @@ import struct
 import datetime
 
 # глобальные переменные
-buf = []
-ref = 0
 # массив FiFo
 valuechannel1 = deque([])
 valuechannel2 = deque([])
@@ -20,7 +18,6 @@ allRawData = []
 ser = serial.Serial("/dev/ttyUSB0")
 
 # преобразование данных
-
 
 def changebyte(needbyte):
     return struct.unpack('b', needbyte)
@@ -40,9 +37,8 @@ def change3byte(need3byte):
 
 def change4byte(need4byte):
     return struct.unpack('>i', need4byte)
+
 # проверка CRC
-
-
 def calc(data):
     crc_table = [
         0x0000, 0xC0C1, 0xC181, 0x0140, 0xC301, 0x03C0, 0x0280, 0xC241, 0xC601, 0x06C0, 0x0780, 0xC741, 0x0500, 0xC5C1, 0xC481, 0x0440,
@@ -77,15 +73,11 @@ def calc(data):
     return crc
 
 # посылка команды прибору
-
-
 def send_cmd(cmd):
     ser.write(cmd.encode())
     time.sleep(0.5)
 
 # инициализация
-
-
 def ser_init():
     # Open serial
     ser.baudrate = 460800
@@ -147,28 +139,14 @@ def ser_init():
     ser.flushInput()
     ser.flushOutput()
 
-# Чтение количества байт из циклического буфера
-
-
-def buf_read(count):
-    global ref
-    res = ""
-    for i in range(count):
-        res += buf[ref]
-        ref = (ref + 1) % len(buf)
-        time.sleep(0.000001)
-    return res
-
 
 def get(count):
-
     data = ser.read(count)
-    # print data
+    # print data  #FIXME debug print
     return data
 
 
 def receive_data_from_eeg():
-
     # массив FiFo
     global valuechannel1
     global valuechannel2
