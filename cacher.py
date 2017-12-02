@@ -142,7 +142,7 @@ def ser_init():
 
 def get(count):
     data = ser.read(count)
-    print data, end=' '  #FIXME debug print
+    print data  #FIXME debug print
     return data
 
 
