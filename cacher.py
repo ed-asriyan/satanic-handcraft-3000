@@ -142,7 +142,7 @@ def ser_init():
 
 def get(count):
     data = ser.read(count)
-    # print data  #FIXME debug print
+    print data  #FIXME debug print
     return data
 
 
@@ -243,7 +243,7 @@ def lets_start():
     print("Считывание начато, осталось: \n")
     while time.time() - start < duration:
         receive_data_from_eeg()
-        time.sleep(2)
+        time.sleep(5)
         print(">>>", duration - (time.time() - start))
 
     f = open("RAW.txt", "w")
