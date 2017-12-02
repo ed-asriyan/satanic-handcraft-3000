@@ -160,13 +160,6 @@ def write_pack_fifo_buf_3D(step_str):
     fout.close()
 
 def receive_data():
-    global Init_done
-    # Работа с последовательном портом и файлом
-
-    ser_init()
-
-    Init_done=True
-
     # массив FiFo
     global valuechannel1
     global valuechannel2
