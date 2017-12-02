@@ -139,10 +139,11 @@ def ser_init():
     ser.flushInput()
     ser.flushOutput()
 
-
+out = open("output.txt", "w")
 def get(count):
+    global out
     data = ser.read(count)
-    print data  #FIXME debug print
+    out.write(data)
     return data
 
 def write_pack_fifo_buf_console(arr1, arr2, arr3):
@@ -216,7 +217,6 @@ def receive_data():
                 crc = change2byteCRC(crc)
                 if int(crc[0]) == crc_check:  # Сравнения CRC
 
-		    print 'YES'
 
 		    break_flag = True #Запрещаем чтение
                     valuechannel1.append(matrix_of_value[0:15][0])
@@ -238,6 +238,7 @@ def receive_data():
 		    break_flag = False #Разрешаем чтение
 		time.sleep(0.03)  # Задержка 30 мс
 
+        print(learnData)
         allRawData.append(learnData)
 
 
