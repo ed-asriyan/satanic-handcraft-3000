@@ -145,36 +145,56 @@ def get(count):
     print data  #FIXME debug print
     return data
 
+def write_pack_fifo_buf_console(arr1, arr2, arr3):
+    s = ""
+    s += " ".join(map(str, arr1)) + " XXX " + " ".join(map(str, arr2)) + " YYY " + " ".join(map(str, arr3))
+    fout = open('fifo', 'w')
+    fout.write(s)
+    fout.close()
 
-def receive_data_from_eeg():
+
+def write_pack_fifo_buf_3D(step_str):
+    fout = open('fifo2', 'w')
+    print step_str
+    fout.write(step_str)
+    fout.close()
+
+def receive_data():
+    global Init_done
+    # Работа с последовательном портом и файлом
+
+    ser_init()
+
+    Init_done=True
+
     # массив FiFo
     global valuechannel1
     global valuechannel2
     global valuechannel3
-    global learnData
-    global education
-
+    global break_flag
+    break_flag = False #Разрешаем чтение
     valuechannel1.clear()
     valuechannel2.clear()
     valuechannel3.clear()
 
-    time.sleep(0.1)
+    v1 = []
+    v2 = []
+    v3 = []
 
     # Clear all buffers
     ser.flushInput()
     ser.flushOutput()
 
-    begin_time = time.time()
     buffer_lst = []
     learnData = []
     counter = 0
-    break_flag = False
-    while not(break_flag):  # Цикл
+    while True:  # Бесконечный цикл чтения
         data_of_byte = get(3)
         header = change3byte(data_of_byte)
         headerfirstbyte = int(header[0])
         headersecondbyte = int(header[1])
         headerthirtbyte = int(header[2])
+
         # Проверка заголок пакета
         while headerfirstbyte != 1 and headersecondbyte != 28 and headerthirtbyte != 32:
             data_of_byte = data_of_byte[1:]
@@ -185,8 +205,7 @@ def receive_data_from_eeg():
             headerthirtbyte = int(header_nextbyte[0])
         if headerfirstbyte == 1 and headersecondbyte == 28 and headerthirtbyte == 32:
             data_of_byte = data_of_byte + get(520)
-            # Информация об объеме данных
-            size = change2byte(data_of_byte[7:9])
+            size = change2byte(data_of_byte[7:9])  # Информация об объеме данных
             if int(size[0]) == 512:  # Проверка размеров данных
                 x = 9
                 data_for_matrix = data_of_byte[0:521]  # Данные от 16 сэмплов
@@ -197,38 +216,36 @@ def receive_data_from_eeg():
                         value = change4byte(data_for_matrix[x:x + 4])
                         x += 4  # Шаг по 4 байта
                         buffer_lst.append(int(value[0]))
-                        # Ввод данных в массив
-                        matrix_of_value[j][i] = buffer_lst[:]
+                        matrix_of_value[j][i] = buffer_lst[:]  # Ввод данных в массив
                         del buffer_lst[:]
                 crc_check = calc(data_for_matrix)
-                crc = ''.join([crc[x:x + 2][::-1]
-                               for x in range(0, len(crc), 2)])
+                crc = ''.join([crc[x:x + 2][::-1] for x in range(0, len(crc), 2)])
                 crc = change2byteCRC(crc)
                 if int(crc[0]) == crc_check:  # Сравнения CRC
-                    end_time = time.time()
-                    my_time = end_time - begin_time
-                    # Пока не получим 4 пакета (но не менее 500 мс от начала предъявления)
-                    if counter < 4:
-                        valuechannel1.append(matrix_of_value[0:15][0])
-                        valuechannel2.append(matrix_of_value[1:15][0])
-                        valuechannel3.append(matrix_of_value[2:15][0])
+
+		    print 'YES'
+
+		    break_flag = True #Запрещаем чтение
+                    valuechannel1.append(matrix_of_value[0:15][0])
+                    valuechannel2.append(matrix_of_value[1:15][0])
+                    valuechannel3.append(matrix_of_value[2:15][0])
+                    for j in range(16):
+                    	v1 += valuechannel1[-1][j]
+                    	v2 += valuechannel2[-1][j]
+                    	v3 += valuechannel3[-1][j]
+                    if counter < 3:  # Пока не получим 4 пакета (~500 мс от начала предъявления)
                         counter += 1
                     else:  # Иначе отправка данных в Bluemix + очистка FiFo
-                        #
-                        for i in range(4):
-                            for j in range(16):
-                                learnData += valuechannel1[i][j]
-                                learnData += valuechannel2[i][j]
-                                learnData += valuechannel3[i][j]
-                        print("__________________")
-                        print(learnData)
-                        print("__________________")
+                        # нужно 3 списка передать valuechannel: 1 2 3
+                        write_pack_fifo_buf_console(v1, v2, v3)
+                        del v1[:]
+                        del v2[:]
+                        del v3[:]
                         counter = 0
-                        time.sleep(0.5)
-                        begin_time = time.time()
-                        break_flag = True
+		    break_flag = False #Разрешаем чтение
+		time.sleep(0.03)  # Задержка 30 мс
 
-                        allRawData.append(learnData)
+        allRawData.append(learnData)
 
 
 def lets_start():
@@ -242,7 +259,7 @@ def lets_start():
     start = time.time()
     print("Считывание начато, осталось: \n")
     while time.time() - start < duration:
-        receive_data_from_eeg()
+        receive_data()
         time.sleep(5)
         print(">>>", duration - (time.time() - start))
 
