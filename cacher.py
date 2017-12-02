@@ -255,7 +255,7 @@ def lets_start():
     # Основной цикл
     print("Начинаю считывание через 5 секунд, запустите видеоролик")
     time.sleep(5)
-    duration = 60 * 3.4  # длительность видео
+    duration = 60 * 11  # длительность видео
     start = time.time()
     print("Считывание начато, осталось: \n")
     while time.time() - start < duration:
