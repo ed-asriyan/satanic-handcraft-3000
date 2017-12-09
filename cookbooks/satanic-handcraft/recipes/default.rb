@@ -41,3 +41,22 @@ pip_requirements '/opt/satanic-handcraft/current/requirements.txt' do
   virtualenv 'satanic-handcraft'
   python 'satanic-handcraft'
 end
+
+tar_extract 'https://clis.ng.bluemix.net/download/bluemix-cli/latest/linux64' do
+	target_dir '/opt/bluemix/'
+	creates '/opt/bluemix/install'
+  	tar_flags [ '-P', '--strip-components 1' ]
+end
+
+bash 'install_bluemix' do
+  cwd '/opt/bluemix/'
+  code <<-EOH
+	./install_bluemix_cli
+	EOH
+end
+
+execute 'install_dev_tools' do
+  command 'curl -sL https://ibm.biz/idt-installer | bash'
+  live_stream true
+  action :run
+end

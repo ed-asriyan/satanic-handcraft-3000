@@ -4,7 +4,7 @@ maintainer_email 'd.mihalkovich@gmail.com'
 license 'All Rights Reserved'
 description 'Installs/Configures satanic-handcraft'
 long_description 'Installs/Configures satanic-handcraft'
-version '0.1.0'
+version '0.1.3'
 chef_version '>= 12.1' if respond_to?(:chef_version)
 
 # The `issues_url` points to the location where issues for this cookbook are
